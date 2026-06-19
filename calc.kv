@@ -1,0 +1,148 @@
+#:kivy 2.0
+<Calculator>:
+    BoxLayout:
+        orientation: "vertical"
+        size_hint: 1,0.1
+        pos_hint: {"top":1}
+        canvas.before:
+            Color:
+                rgba: 0.06,0.09,0.165,1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: "Calculator"
+            bold: True
+            font_size: "40sp"
+            halign: "left"
+            valign: "middle"
+            text_size: self.size
+            padding: 30
+    TextInput:
+        id: expression
+        bold: True
+        multiline: True
+        readonly: True
+        use_bubble: False
+        use_handles: False
+        selection_color: 0,0,0,0
+        text: "0"
+        font_size: "50sp"
+        size_hint: 0.98,0.15
+        pos_hint: {"x":0.01,"top":0.9}
+        halign: "right"
+        valign: "middle"
+        text_size: self.width-30,None
+        padding: [20,25]
+    GridLayout:
+        cols: 4
+        rows: 5
+        size_hint: 1,0.75
+        Button:
+            text: "C"
+            bold: True
+            font_size: "30sp"
+            background_color: 0.45,0.45,0.45,1
+            on_press: root.clear()
+        Button:
+            text: "%"
+            bold: True
+            font_size: "30sp"
+            background_color: 0.45,0.45,0.45,1
+            on_press: root.button("%")
+        Button:
+            text: "/"
+            bold: True
+            font_size: "30sp"
+            background_color: 0.45,0.45,0.45,1
+            on_press: root.button("/")
+        Button:
+            text: "x"
+            bold: True
+            font_size: "30sp"
+            background_color: 0.45,0.45,0.45,1
+            on_press: root.button("*")
+        Button:
+            text: "7"
+            bold: True
+            font_size: "30sp"
+            on_press: root.button("7")
+        Button:
+            text: "8"
+            bold: True
+            font_size: "30sp"
+            on_press: root.button("8")
+        Button:
+            text: "9"
+            bold: True
+            font_size: "30sp"
+            on_press: root.button("9")
+        Button:
+            text: "-"
+            bold: True
+            font_size: "30sp"
+            background_color: 0.45,0.45,0.45,1
+            on_press: root.button("-")
+        Button:
+            text: "4"
+            bold: True
+            font_size: "30sp"
+            on_press: root.button("4")
+        Button:
+            text: "5"
+            bold: True
+            font_size: "30sp"
+            on_press: root.button("5")
+        Button:
+            text: "6"
+            bold: True
+            font_size: "30sp"
+            on_press: root.button("6")
+        Button:
+            text: "+"
+            bold: True
+            font_size: "30sp"
+            background_color: 0.45,0.45,0.45,1
+            on_press: root.button("+")
+        Button:
+            text: "1"
+            bold: True
+            font_size: "30sp"
+            on_press: root.button("1")
+        Button:
+            text: "2"
+            bold: True
+            font_size: "30sp"
+            on_press: root.button("2")
+        Button:
+            text: "3"
+            bold: True
+            font_size: "30sp"
+            on_press: root.button("3")
+        Button:
+            text: "<<"
+            bold: True
+            font_size: "30sp"
+            background_color: 0.45,0.45,0.45,1
+            on_press: root.remove_last()
+        Button:
+            text: "MADE\n   BY"
+            bold: True
+            font_size: "28sp"
+            on_press: root.developer()
+        Button:
+            text: "0"
+            bold: True
+            font_size: "30sp"
+            on_press: root.button("0")
+        Button:
+            text: "."
+            bold: True
+            font_size: "30sp"
+            on_press: root.button(".")
+        Button:
+            text: "="
+            bold: True
+            font_size: "30sp"
+            background_color: 0.45,0.45,0.45,1
+            on_press: root.equal()
