@@ -21,34 +21,51 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10'
+        python-version: '3.11'
     
-    - name: Install system dependencies
+    - name: Install all dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential python3-dev libjpeg-dev zlib1g-dev libtiff-dev libfreetype6-dev liblcms2-dev libharfbuzz-dev libwebp-dev
+        sudo apt-get install -y \
+          build-essential python3-dev libjpeg-dev zlib1g-dev \
+          libtiff-dev libfreetype6-dev liblcms2-dev libharfbuzz-dev \
+          libwebp-dev git wget curl libffi-dev libssl-dev
     
-    - name: Install Python packages
+    - name: Install Python tools
       run: |
-        pip install --upgrade cython==0.29.32
-        pip install buildozer kivy
+        pip install --upgrade pip
+        pip install cython==0.29.32 buildozer kivy
     
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v2
-      with:
-        api-level: 31
-        ndk-version: 25.1.8937393
-        build-tools-version: 31.0.0
+    - name: Download and setup Android SDK
+      run: |
+        mkdir -p ~/android-sdk
+        cd ~/android-sdk
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-11092837_latest.zip
+        unzip -q commandlinetools-linux-11092837_latest.zip
+        mkdir -p cmdline-tools/latest
+        mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
+        export ANDROID_SDK_ROOT=~/android-sdk
+        export PATH=$PATH:~/android-sdk/cmdline-tools/latest/bin
+        yes | sdkmanager --licenses 2>&1 | head -20
+        sdkmanager "platforms;android-31" 2>&1 | tail -5
+        sdkmanager "build-tools;31.0.0" 2>&1 | tail -5
+        sdkmanager "ndk;25.1.8937393" 2>&1 | tail -5
     
     - name: Build APK
       env:
+        ANDROID_SDK_ROOT: /home/runner/android-sdk
+        ANDROID_NDK_ROOT: /home/runner/android-sdk/ndk/25.1.8937393
         JAVA_HOME: /usr/lib/jvm/temurin-17-jdk-amd64
       run: |
-        buildozer android debug
+        buildozer android debug 2>&1 | tail -100
     
     - name: Upload APK
+      if: success()
       uses: actions/upload-artifact@v4
       with:
         name: calculator-apk
         path: bin/*.apk
         retention-days: 30
+    
+    - name: Show result
+      run: ls -lah bin/ || echo "No APK found"
