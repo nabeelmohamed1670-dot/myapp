@@ -23,21 +23,28 @@ jobs:
         sudo apt-get install -y openjdk-11-jdk build-essential python3-dev libjpeg-dev zlib1g-dev libtiff-dev libfreetype6-dev liblcms2-dev libharfbuzz-dev libwebp-dev
         pip install --upgrade cython==0.29.32 buildozer kivy
     
-    - name: Download Android SDK
+    - name: Setup Android SDK
       run: |
         mkdir -p ~/Android
-        wget -q https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip
-        unzip -q sdk-tools-linux-4333796.zip -d ~/Android
-        mkdir -p ~/Android/cmdline-tools
-        mv ~/Android/tools ~/Android/cmdline-tools/latest
+        cd ~/Android
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip -q commandlinetools-linux-9477386_latest.zip
+        mkdir -p cmdline-tools/latest
+        mv cmdline-tools/* cmdline-tools/latest/ || true
+        rm -rf commandlinetools-linux-9477386_latest.zip
     
     - name: Install Android packages
       run: |
-        yes | ~/Android/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null
-        ~/Android/cmdline-tools/latest/bin/sdkmanager "platforms;android-31" "build-tools;31.0.0" "ndk;25.1.8937393"
+        export ANDROID_HOME=~/Android
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+        yes | sdkmanager --licenses || true
+        sdkmanager "platforms;android-31"
+        sdkmanager "build-tools;31.0.0"
+        sdkmanager "ndk;25.1.8937393"
     
     - name: Build APK
       env:
+        ANDROID_HOME: /root/Android
         ANDROID_SDK_ROOT: /root/Android
         ANDROID_NDK_ROOT: /root/Android/ndk/25.1.8937393
       run: buildozer android debug
