@@ -1,22 +1,49 @@
 name: Build APK
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Build APK
-        uses: ArtemSBulgakov/buildozer-action@v1
-        with:
-          command: buildozer android debug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: apk
-          path: bin/*.apk
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openjdk-11-jdk build-essential python3-dev libjpeg-dev zlib1g-dev libtiff-dev libfreetype6-dev liblcms2-dev libharfbuzz-dev libwebp-dev
+        pip install --upgrade cython==0.29.32 buildozer kivy
+    
+    - name: Download Android SDK
+      run: |
+        mkdir -p ~/Android
+        wget -q https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip
+        unzip -q sdk-tools-linux-4333796.zip -d ~/Android
+        mkdir -p ~/Android/cmdline-tools
+        mv ~/Android/tools ~/Android/cmdline-tools/latest
+    
+    - name: Install Android packages
+      run: |
+        yes | ~/Android/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null
+        ~/Android/cmdline-tools/latest/bin/sdkmanager "platforms;android-31" "build-tools;31.0.0" "ndk;25.1.8937393"
+    
+    - name: Build APK
+      env:
+        ANDROID_SDK_ROOT: /root/Android
+        ANDROID_NDK_ROOT: /root/Android/ndk/25.1.8937393
+      run: buildozer android debug
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: calculator-apk
+        path: bin/*.apk
