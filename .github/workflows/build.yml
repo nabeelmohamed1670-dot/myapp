@@ -12,45 +12,39 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+    
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
     
-    - name: Install dependencies
+    - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y openjdk-11-jdk build-essential python3-dev libjpeg-dev zlib1g-dev libtiff-dev libfreetype6-dev liblcms2-dev libharfbuzz-dev libwebp-dev
-        pip install --upgrade cython==0.29.32 buildozer kivy
+        sudo apt-get install -y build-essential python3-dev libjpeg-dev zlib1g-dev libtiff-dev libfreetype6-dev liblcms2-dev libharfbuzz-dev libwebp-dev
     
-    - name: Setup Android SDK
+    - name: Install Python packages
+      run: pip install --upgrade cython==0.29.32 buildozer kivy
+    
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v2
+      with:
+        api-level: 31
+        ndk-version: 25.1.8937393
+        build-tools-version: 31.0.0
+    
+    - name: Build APK with Buildozer
       run: |
-        mkdir -p ~/Android
-        cd ~/Android
-        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip -q commandlinetools-linux-9477386_latest.zip
-        mkdir -p cmdline-tools/latest
-        mv cmdline-tools/* cmdline-tools/latest/ || true
-        rm -rf commandlinetools-linux-9477386_latest.zip
-    
-    - name: Install Android packages
-      run: |
-        export ANDROID_HOME=~/Android
-        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
-        yes | sdkmanager --licenses || true
-        sdkmanager "platforms;android-31"
-        sdkmanager "build-tools;31.0.0"
-        sdkmanager "ndk;25.1.8937393"
-    
-    - name: Build APK
-      env:
-        ANDROID_HOME: /root/Android
-        ANDROID_SDK_ROOT: /root/Android
-        ANDROID_NDK_ROOT: /root/Android/ndk/25.1.8937393
-      run: buildozer android debug
+        buildozer android debug
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: calculator-apk
         path: bin/*.apk
+        retention-days: 30
